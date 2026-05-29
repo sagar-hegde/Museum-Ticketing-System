@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museum Ticket Booking</title>
+    <style>
+        body {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            background: linear-gradient(110deg, #cd81e4, #eabf97);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            font-size: 16px;
+        }
+
+        .ticket-inputs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .total-tickets {
+            font-weight: bold;
+        }
+
+        .total-fare {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            height: 40px;
+            border: 1px solid darkslateblue;
+            background: #2691d9;
+            border-radius: 25px;    
+            font-size: 18px;
+            color: #e9f4fb;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            padding: 0 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #119a01;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Visitor Details</h1>
+        <form id="bookingForm">
+            <label for="name">Name :</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="contact">Contact Number :</label>
+            <input type="tel" id="contact" name="contact" pattern="[0-9]{10}" required>
+            
+            <label for="date">Date of Visit :</label>
+            <input type="date" id="date" name="date" required>
+            
+            <div class="total-tickets">
+                Number of Tickets : <span id="totalTickets">0</span>
+            </div>
+
+            <div class="ticket-inputs">
+                <div>
+                    <label for="adults">Adults :</label>
+                    <input type="number" id="adults" name="adults" min="0" required>
+                </div>
+                <div>
+                    <label for="children">Children :</label>
+                    <input type="number" id="children" name="children" min="0" required>
+                </div>
+            </div>
+
+            <div class="total-fare">
+                Total Fare : <span id="totalFare">0.00</span>
+            </div>
+            
+            <button type="submit">Book Tickets</button>
+        </form>
+    </div>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHiYv-eBCuGGxb3cAD7aGL0ad3JzXAoaM",
+            authDomain: "mts-f4aad.firebaseapp.com",
+            databaseURL: "https://mts-f4aad-default-rtdb.firebaseio.com",
+            projectId: "mts-f4aad",
+            storageBucket: "mts-f4aad.appspot.com",
+            messagingSenderId: "376882608883",
+            appId: "1:376882608883:web:a6be4fef98370670ae1586"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set the min date to today for the date input
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+        });
+
+        document.getElementById('bookingForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const date = document.getElementById('date').value;
+            const adults = parseInt(document.getElementById('adults').value) || 0;
+            const children = parseInt(document.getElementById('children').value) || 0;
+            const contact = document.getElementById('contact').value;
+            
+            const totalTickets = adults + children;
+            const farePerAdult = 450; // Price per adult
+            const farePerChild = 150;  // Price per child
+            const totalFare = (adults * farePerAdult) + (children * farePerChild);
+
+            const location = "Chhatrapati Shivaji Maharaj Vastu Sangrahalaya";
+            const bookingId = generateBookingId();
+
+            console.log('Booking Details:', {
+                name: name,
+                date: date,
+                adults: adults,
+                children: children,
+                totalTickets: totalTickets,
+                totalFare: totalFare.toFixed(2),
+                contact: contact,
+                location: location,
+                bookingId: bookingId
+            });
+
+            document.getElementById('totalTickets').textContent = totalTickets;
+            document.getElementById('totalFare').textContent = totalFare.toFixed(2);
+
+            // Save data to Firebase
+            const bookingRef = ref(database, `bookings/${location}/${date}/${bookingId}`);
+            set(bookingRef, {
+                name: name,
+                date: date,
+                adults: adults,
+                children: children,
+                totalTickets: totalTickets,
+                totalFare: totalFare.toFixed(2),
+                contact: contact
+            })
+            .then(() => {
+                console.log('Booking saved successfully');
+                // Redirect to pay.html
+                window.location.href = 'pay.html';
+            })
+            .catch((error) => {
+                console.error('Error saving booking:', error);
+            });
+        });
+
+        function updateTotalTickets() {
+            const adults = parseInt(document.getElementById('adults').value) || 0;
+            const children = parseInt(document.getElementById('children').value) || 0;
+            const totalTickets = adults + children;
+            const farePerAdult = 450;
+            const farePerChild = 150;
+            const totalFare = (adults * farePerAdult) + (children * farePerChild);
+
+            document.getElementById('totalTickets').textContent = totalTickets;
+            document.getElementById('totalFare').textContent = totalFare.toFixed(2);
+        }
+
+        document.getElementById('adults').addEventListener('input', updateTotalTickets);
+        document.getElementById('children').addEventListener('input', updateTotalTickets);
+
+        function generateBookingId() {
+            return Math.floor(10000 + Math.random() * 90000); // Generates a random 5-digit number
+        }
+    </script>  
+</body>
+</html>

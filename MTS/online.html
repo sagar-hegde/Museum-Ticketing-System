@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Payment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border: none;
+            outline: none;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            text-transform: capitalize;
+            transition: all 0.2s linear;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 25px;
+            background: white;
+            background: linear-gradient(110deg, #cd81e4, #eabf97);        
+        }
+
+        .container form {
+            width: 700px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 25px;
+        }
+
+        .container form .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .container form .row .col {
+            flex: 1 1 250px;
+        }
+
+        .col .title {
+            font-size: 20px;
+            color: red;
+            padding-bottom: 5px;
+        }
+
+        .col .inputBox {
+            margin: 15px 0;
+        }
+
+        .col .inputBox label {
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .col .inputBox input,
+        .col .inputBox select {
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            font-size: 17px;
+            border-radius: 30px;
+        }
+
+        .col .inputBox input:focus,
+        .col .inputBox select:focus {
+            border: 1px solid #000;
+        }
+
+        .col .flex {
+            display: flex;
+            gap: 15px;
+        }
+
+        .col .flex .inputBox {
+            flex: 1 1;
+            margin-top: 5px;
+        }
+
+        .col .inputBox img {
+            height: 34px;
+            margin-top: 5px;
+            filter: drop-shadow(0 0 1px #000);
+        }
+
+        .container form .submit_btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 20px;
+            border: 1px solid darkslateblue;
+            background: #2691d9;
+            color: #fff;
+            margin-top: 5px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .container form .submit_btn:hover {
+            background-color: #119a01;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);        }
+
+        input::-webkit-inner-spin-button,
+        input::-webkit-outer-spin-button {
+            display: none;
+        }
+
+        #creditCardDetails,
+        #upiDetails {
+            display: none; /* Hide details initially */
+        }
+
+        .col .date-cvv-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .col .date-cvv-container .inputBox {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .col .upi-logos {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .col .upi-logos img {
+            height: 100px; /* Adjust the size as needed */
+            filter: drop-shadow(0 0 1px #000);
+        }
+
+        /* Modal styles */
+        .Tmodal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .Tmodal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed; /* Change to fixed positioning */
+            top: 30%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%);
+        }
+
+        .timer-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 10px solid darkgreen; /* Light blue border */
+            margin: 0 auto; /* Center the timer */
+        }
+
+        #timer {
+            font-size: 2.5rem;
+            color: #333;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 17px;
+            color: black;
+        }
+    </style>
+    <style>
+        /* Modal Popup Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: lightgreen; /* Semi-transparent background */
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+    
+        .modal-content {
+            background: white;
+            margin: 10% auto; /* Center the modal content horizontally */
+            padding: 20px;
+            border-radius: 20px;
+            width: 50%; /* Could be more or less, depending on screen size */
+            text-align: center;
+            position: fixed; /* Change to fixed positioning */
+            top: 25%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%);
+            animation: fadeIn 0.5s ease-in;
+        }
+    
+        .modal-content .checkmark-container {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+    
+        .modal-content .checkmark {
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+        }
+    
+        .checkmark path {
+            stroke: #4caf50;
+            stroke-width: 8;
+            fill: none;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: draw 0.5s ease-in-out forwards;
+        }
+    
+        @keyframes draw {
+            from {
+                stroke-dashoffset: 100;
+            }
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    
+        .modal-content .message {
+            font-size: 24px;
+            color: black;
+        }
+    </style>    
+</head>
+
+<body>
+    <div class="container">
+        <form action="#">
+            <div class="row">
+                <div class="col">
+                    <center><h3 class="title">PAYMENT</h3></center>
+
+                    <!-- Payment Method Selection -->
+                    <div class="inputBox">
+                        <label for="paymentMethod">
+                            Select Payment Method :
+                        </label>
+                        <select id="paymentMethod">
+                            <option value="">Choose Payment Method</option>
+                            <option value="creditCard">Credit / Debit Card</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+
+                    <!-- Credit Card Details -->
+                    <div id="creditCardDetails">
+                        <div class="inputBox">
+                            <label for="name">
+                                Card Accepted :
+                            </label>
+                            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20240715140014/Online-Payment-Project.webp" alt="credit/debit card image">
+                        </div>
+
+                        <div class="inputBox">
+                            <label for="cardName">
+                                Name On Card :
+                            </label>
+                            <input type="text" id="cardName" placeholder="Enter card name" required>
+                        </div>
+
+                        <div class="inputBox">
+                            <label for="cardNum">
+                                Card Number :
+                            </label>
+                            <input type="text" id="cardNum" placeholder="1111-2222-3333-4444" maxlength="19" required>
+                        </div>
+
+                        <div class="date-cvv-container">
+                            <div class="inputBox">
+                                <label for="expDate">Exp Date :</label>
+                                <input type="month" id="expDate" required>
+                            </div>
+
+                            <div class="inputBox">
+                                <label for="cvv">CVV :</label>
+                                <input type="number" id="cvv" placeholder="3 Digit Number" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPI Details -->
+                    <div id="upiDetails">
+                        <div class="inputBox">
+                            <label for="upiAccepted">UPI Accepted :</label>
+                            <div class="upi-logos">
+                                <img src="https://miro.medium.com/v2/resize:fit:1400/0*BIy_CblCTVoOl5Zg" alt="UPI">
+                            </div>
+                        </div>
+                        <div class="inputBox">
+                            <label for="upiId">UPI ID :</label>
+                            <input type="text" id="upiId" placeholder="Enter your UPI ID" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" value="Verify" class="submit_btn">
+        </form>
+    </div>
+
+    <div id="timerModal" class="Tmodal">
+        <div class="Tmodal-content">
+            <div class="timer-container">
+                <div id="timer">05:00</div>
+            </div>
+            <div class="note">
+                Please use your Payment app to complete the payment using the details provided.
+            </div>
+        </div>
+    </div>
+    
+    <div id="successModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <div class="checkmark-container">
+                <svg class="checkmark" viewBox="0 0 50 50">
+                    <path d="M12 25 l10 10 l20 -20"></path>
+                </svg>
+            </div>
+            <div class="message" id="modalTitle">Payment Successful</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let paymentMethodSelect = document.querySelector('#paymentMethod');
+            let creditCardDetails = document.querySelector('#creditCardDetails');
+            let upiDetails = document.querySelector('#upiDetails');
+            let timerModal = document.querySelector('#timerModal');
+            let successModal = document.querySelector('#successModal');
+            let timerDisplay = document.querySelector('#timer');
+            let targetTime, intervalId;
+        
+            // Function to generate a random time between two times
+            function getRandomTime(startTime, endTime) {
+                function timeToMinutes(time) {
+                    const [hours, minutes] = time.split(':').map(Number);
+                    return hours * 60 + minutes;
+                }
+        
+                function minutesToTime(minutes) {
+                    const hours = Math.floor(minutes / 60);
+                    const mins = minutes % 60;
+                    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+                }
+        
+                const startMinutes = timeToMinutes(startTime);
+                const endMinutes = timeToMinutes(endTime);
+        
+                const randomMinutes = Math.floor(Math.random() * (startMinutes - endMinutes + 1)) + endMinutes;
+                return minutesToTime(randomMinutes);
+            }
+        
+            // Function to update the timer
+            function updateCountdown() {
+                let now = new Date().getTime();
+                let timeRemaining = targetTime - now;
+        
+                if (timeRemaining <= 0) {
+                    timerDisplay.innerText = '00:00';
+                    clearInterval(intervalId);
+                    return;
+                }
+        
+                let minutes = Math.floor(timeRemaining / (1000 * 60));
+                let seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+        
+                const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                timerDisplay.innerText = formattedTime;
+        
+                // Check against a random time between 04:56 and 04:48
+                const randomTime = getRandomTime('04:56', '04:48');
+                if (formattedTime === randomTime) {
+                    successModal.style.display = 'block';
+                    clearInterval(intervalId);
+                    setTimeout(goToTicket, 2000); // Redirect after 1 second
+                }
+            }
+        
+            function goToTicket() {
+                // Close the success modal
+                successModal.style.display = 'none';
+                // Redirect to the ticket page
+                window.location.href = 'ticket.html';
+            }
+        
+            paymentMethodSelect.addEventListener('change', () => {
+                let selectedMethod = paymentMethodSelect.value;
+                if (selectedMethod === 'creditCard') {
+                    creditCardDetails.style.display = 'block';
+                    upiDetails.style.display = 'none';
+                } else if (selectedMethod === 'upi') {
+                    creditCardDetails.style.display = 'none';
+                    upiDetails.style.display = 'block';
+                } else {
+                    creditCardDetails.style.display = 'none';
+                    upiDetails.style.display = 'none';
+                }
+            });
+        
+            let cardNumInput = document.querySelector('#cardNum');
+            cardNumInput.addEventListener('keyup', () => {
+                let cNumber = cardNumInput.value;
+                cNumber = cNumber.replace(/\s/g, "");
+        
+                if (Number(cNumber)) {
+                    cNumber = cNumber.match(/.{1,4}/g);
+                    cNumber = cNumber.join(" ");
+                    cardNumInput.value = cNumber;
+                }
+            });
+        
+            // Function to validate form
+            function validateForm() {
+                let isValid = true;
+        
+                if (paymentMethodSelect.value === 'creditCard') {
+                    let cardName = document.querySelector('#cardName').value.trim();
+                    let cardNum = document.querySelector('#cardNum').value.trim();
+                    let expDate = document.querySelector('#expDate').value.trim();
+                    let cvv = document.querySelector('#cvv').value.trim();
+        
+                    if (!cardName || !cardNum || !expDate || !cvv) {
+                        isValid = false;
+                    }
+                } else if (paymentMethodSelect.value === 'upi') {
+                    let upiId = document.querySelector('#upiId').value.trim();
+        
+                    if (!upiId) {
+                        isValid = false;
+                    }
+                } else {
+                    isValid = false;
+                }
+        
+                return isValid;
+            }
+        
+            // Handle form submission
+            document.querySelector('.submit_btn').addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent form submission
+                
+                if (validateForm()) {
+                    // Set the target time for the countdown (5 minutes from now)
+                    targetTime = new Date().getTime() + 5 * 60 * 1000;
+        
+                    // Display the modal
+                    timerModal.style.display = 'block';
+        
+                    // Update the countdown every second
+                    intervalId = setInterval(updateCountdown, 1000);
+                    
+                    // Initial call to display the timer immediately
+                    updateCountdown();
+                } else {
+                    alert('Please fill in all required fields.');
+                }
+            });
+        
+            // Close modal logic
+            window.onclick = function(event) {
+                if (event.target === timerModal || event.target === successModal) {
+                    timerModal.style.display = 'none';
+                    successModal.style.display = 'none';
+                    // Stop the timer when modal is closed
+                    clearInterval(intervalId);
+                }
+            };
+        });
+    </script>
+    </body>
+</html>

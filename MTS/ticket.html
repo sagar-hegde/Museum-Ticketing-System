@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTS</title>
+    <style>
+        body {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        nav {
+            background: linear-gradient(110deg, #cd81e4, #eabf97);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: black;
+            font-size: 25px;
+            margin-left: 25px;
+            font-weight: bold;
+        }
+
+        .nav_links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav_links li {
+            font-size: 20px;
+        }
+
+        .nav_links a {
+            font-weight: 500;
+            font-size: 20px;
+            color: black;
+            text-decoration: none;
+            padding: 9px 25px;
+            border: 2px solid #5102a0;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav_links a:hover {
+            background-color: limegreen;
+            border: 2px solid darkgreen;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #loadingMessage {
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .ticket {
+            border: 3px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            box-sizing: border-box;
+            position: relative;
+            max-width: 400px;
+        }
+
+        .ticket:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8);
+        }
+
+        .ticket-header {
+            margin-bottom: 20px;
+            font-size: 17px;
+        }
+
+        .bold-label {
+            font-weight: bold;
+        }
+
+        .bold-label-date {
+            font-weight: bold;
+            margin-left: 60px;
+        }
+
+        .ticket p {
+            margin: 4px 0; /* Reduced margin between paragraphs */
+        }
+
+        .details-row {
+            display: flex;
+            gap: 30px; /* Reduce the gap between the items */
+        }
+
+        .details-row p {
+            margin: 0; /* Remove default margin */
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .qr-container {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        .qr-button {
+            width: 50%;
+            height: 45px;
+            border: 1px solid darkslateblue;
+            background: goldenrod;
+            border-radius: 25px;
+            font-size: 17px;
+            color: whitesmoke;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            padding: 0 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative; /* changed from absolute */
+            margin-top: 5px;
+        }
+
+        .qr-button:hover {
+            background-color: #119a01;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .qr-code {
+            margin-top: 10px;
+            display: none;
+            width: 150px; /* Set width */
+            height: 150px; /* Set height */
+        }
+
+        footer {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(110deg, #cd81e4, #eabf97);
+            color: #fff;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="logo">MTS</span>
+        <ul class="nav_links">
+            <li><a href="dashboard.html">Home</a></li>
+            <li><a href="ticket.html">My Tickets</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div id="loadingMessage">Loading... Please Wait...</div>
+        <div class="container" id="ticketContainer">
+            <!-- Tickets will be inserted here -->
+        </div>
+        <div id="errorContainer" class="error-message"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js';
+            import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js';
+
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDHiYv-eBCuGGxb3cAD7aGL0ad3JzXAoaM",
+                authDomain: "mts-f4aad.firebaseapp.com",
+                databaseURL: "https://mts-f4aad-default-rtdb.firebaseio.com",
+                projectId: "mts-f4aad",
+                storageBucket: "mts-f4aad.appspot.com",
+                messagingSenderId: "376882608883",
+                appId: "1:376882608883:web:a6be4fef98370670ae1586"
+            };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const database = getDatabase(app);
+
+            // Function to convert yyyy-mm-dd to dd-mm-yyyy
+            function formatDate(dateStr) {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}-${month}-${year}`;
+            }
+
+            async function fetchAllBookings() {
+                const loadingMessage = document.getElementById('loadingMessage');
+                const ticketContainer = document.getElementById('ticketContainer');
+                const errorContainer = document.getElementById('errorContainer');
+
+                // Show loading message
+                loadingMessage.style.display = 'block';
+
+                try {
+                    const locationsRef = ref(database, 'bookings');
+                    const locationsSnapshot = await get(locationsRef);
+
+                    if (locationsSnapshot.exists()) {
+                        const locations = locationsSnapshot.val();
+                        const tickets = [];
+
+                        for (const [location, dates] of Object.entries(locations)) {
+                            for (const [date, bookings] of Object.entries(dates)) {
+                                for (const [bookingId, booking] of Object.entries(bookings)) {
+                                    tickets.push({ ...booking, bookingId, location, date });
+                                }
+                            }
+                        }
+
+                        // Sort tickets by date
+                        tickets.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                        if (tickets.length === 0) {
+                            errorContainer.innerText = 'No bookings available.';
+                            ticketContainer.style.display = 'none';
+                        } else {
+                            tickets.forEach(ticket => {
+                                const formattedDate = formatDate(ticket.date);
+
+                                const bookingInfo = `
+                                    Booking ID: ${ticket.bookingId}
+                                    Date: ${formattedDate}
+                                    Name: ${ticket.name}
+                                    Contact: ${ticket.contact}
+                                    Location: ${ticket.location}
+                                    Adults: ${ticket.adults}
+                                    Children: ${ticket.children}
+                                    Total Tickets: ${ticket.totalTickets}
+                                    Total Fare: ${ticket.totalFare}
+                                `;
+
+                                const ticketElement = document.createElement('div');
+                                ticketElement.className = 'ticket';
+
+                                ticketElement.innerHTML = `
+                                    <div class="ticket-header">
+                                        <span class="bold-label">Booking ID :</span> ${ticket.bookingId}    
+                                        <span class="bold-label-date">Date :</span> ${formattedDate}
+                                    </div>
+                                    <p><span class="label">Name :</span> ${ticket.name}</p>
+                                    <p><span class="label">Contact :</span> ${ticket.contact}</p>
+                                    <p><span class="label">Location :</span> ${ticket.location}</p>
+                                    <div class="details-row">
+                                        <p><span class="label">Adults :</span> ${ticket.adults}</p>
+                                        <p><span class="label">Children :</span> ${ticket.children}</p>
+                                    </div>
+                                    <p><span class="label">Total Tickets :</span> ${ticket.totalTickets}</p>
+                                    <p><span class="label">Total Fare :</span> ${ticket.totalFare}</p>
+                                    <button class="qr-button" data-info="${encodeURIComponent(bookingInfo)}">Show QR</button>
+                                    <div class="qr-container">
+                                        <div class="qr-code" id="qr-${ticket.bookingId}"></div>
+                                    </div>
+                                `;
+
+                                ticketContainer.appendChild(ticketElement);
+                            });
+
+                            // Add event listeners for QR buttons
+                            document.querySelectorAll('.qr-button').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const qrContainer = this.nextElementSibling;
+                                    const qrCodeDiv = qrContainer.querySelector('.qr-code');
+                                    if (qrCodeDiv.style.display === 'none' || !qrCodeDiv.style.display) {
+                                        // Generate and show QR code
+                                        $(qrCodeDiv).qrcode({
+                                            text: decodeURIComponent(this.dataset.info),
+                                            width: 150, // Set QR code width
+                                            height: 150 // Set QR code height
+                                        });
+                                        qrCodeDiv.style.display = 'block';
+                                    } else {
+                                        // Hide QR code
+                                        qrCodeDiv.style.display = 'none';
+                                        qrCodeDiv.innerHTML = ''; // Clear QR code
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        errorContainer.innerText = 'No data available';
+                        ticketContainer.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching booking data:', error);
+                    errorContainer.innerText = 'Error fetching booking data';
+                    ticketContainer.style.display = 'none';
+                } finally {
+                    // Hide loading message
+                    loadingMessage.style.display = 'none';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', fetchAllBookings);
+        </script>        
+    </main>
+    <footer>
+        <p>Copyright &copy; 2024 MTS. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
