@@ -105,7 +105,7 @@ MTS provides a **smart and contactless ticketing system** with:
 
 ## 🎯 Key Highlights for Recruiters
 
-✔ Real-world problem solving
+✔ Real-world problem solving 
 ✔ Enhanced frontend (UI/UX improvements)
 ✔ Firebase integration
 ✔ Dynamic DOM manipulation
