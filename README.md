@@ -103,14 +103,14 @@ MTS provides a **smart and contactless ticketing system** with:
 
 ---
 
-## 🎯 Key Highlights for Recruiters
+## 🎯 Key Highlights of Projects
 
-✔ Real-world problem solving 
-✔ Enhanced frontend (UI/UX improvements)
-✔ Firebase integration
-✔ Dynamic DOM manipulation
-✔ QR-based system implementation
-✔ Scalable and practical architecture
+✔ Real-world problem solving  
+✔ Firebase integration  
+✔ Dynamic DOM manipulation  
+✔ QR-based system implementation  
+✔ Clean UI/UX design  
+✔ Scalable architecture  
 
 ---
 
