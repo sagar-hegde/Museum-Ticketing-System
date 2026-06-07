@@ -1,6 +1,6 @@
 # 🎟️ MTS – Museum Ticketing System
 
-> 🚀 A modern, user-friendly, and eco-conscious digital ticketing solution designed to transform museum experiences.
+> 🚀 A modern, user-friendly, and eco-conscious digital ticketing solution designed to transform museum experiences. 
 
 ---
 
