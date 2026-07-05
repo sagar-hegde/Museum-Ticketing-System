@@ -192,7 +192,105 @@ def plotConvergence(outfilename, imagename):
     print(imagename)
     fig.savefig(imagename, format='pdf', dpi=1200)
     #plt.show()
-    
+
+class ETicketSystem:
+    def __init__(self):
+        self.tickets = {}
+        self.ticket_no = 1001
+
+    def book_ticket(self):
+        print("\n--- Book Ticket ---")
+        name = input("Enter Name: ")
+        destination = input("Enter Destination: ")
+        seats = int(input("Enter Number of Seats: "))
+
+        ticket = {
+            "Name": name,
+            "Destination": destination,
+            "Seats": seats
+        }
+
+        self.tickets[self.ticket_no] = ticket
+        print(f"\nTicket Booked Successfully!")
+        print(f"Ticket Number: {self.ticket_no}")
+        self.ticket_no += 1
+
+    def view_tickets(self):
+        print("\n--- Booked Tickets ---")
+
+        if not self.tickets:
+            print("No tickets found.")
+            return
+
+        for number, details in self.tickets.items():
+            print("-" * 30)
+            print("Ticket No :", number)
+            print("Name      :", details["Name"])
+            print("Destination:", details["Destination"])
+            print("Seats     :", details["Seats"])
+
+    def cancel_ticket(self):
+        print("\n--- Cancel Ticket ---")
+        number = int(input("Enter Ticket Number: "))
+
+        if number in self.tickets:
+            del self.tickets[number]
+            print("Ticket Cancelled Successfully.")
+        else:
+            print("Ticket Not Found.")
+
+    def search_ticket(self):
+        print("\n--- Search Ticket ---")
+        number = int(input("Enter Ticket Number: "))
+
+        if number in self.tickets:
+            t = self.tickets[number]
+            print("\nTicket Found")
+            print("Name:", t["Name"])
+            print("Destination:", t["Destination"])
+            print("Seats:", t["Seats"])
+        else:
+            print("Ticket Not Found.")
+
+    def menu(self):
+        while True:
+            print("\n===== E-Ticketing System =====")
+            print("1. Book Ticket")
+            print("2. View Tickets")
+            print("3. Search Ticket")
+            print("4. Cancel Ticket")
+            print("5. Exit")
+
+            choice = input("Enter Choice: ")
+
+            if choice == "1":
+                self.book_ticket()
+
+            elif choice == "2":
+                self.view_tickets()
+
+            elif choice == "3":
+                self.search_ticket()
+
+            elif choice == "4":
+                self.cancel_ticket()
+
+            elif choice == "5":
+                print("Thank you for using the E-Ticketing System!")
+                break
+
+            else:
+                print("Invalid Choice! Try Again.")
+
+
+def main():
+    system = ETicketSystem()
+    system.menu()
+
+
+if __name__ == "__main__":
+    main()
+
 def main(NewtonIter, Gamma, ResultName): 
     #dataname = 'logis_U8'
     dataname = 'covtype'
