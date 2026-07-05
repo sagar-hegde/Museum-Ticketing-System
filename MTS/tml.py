@@ -291,6 +291,223 @@ def main():
 if __name__ == "__main__":
     main()
 
+import json
+import os
+import random
+from datetime import datetime
+
+USERS_FILE = "users.json"
+TICKETS_FILE = "tickets.json"
+
+# -----------------------------
+# Create files if they don't exist
+# -----------------------------
+def initialize_files():
+    if not os.path.exists(USERS_FILE):
+        admin = {
+            "admin": {
+                "password": "admin123",
+                "role": "admin"
+            }
+        }
+        with open(USERS_FILE, "w") as f:
+            json.dump(admin, f, indent=4)
+
+    if not os.path.exists(TICKETS_FILE):
+        with open(TICKETS_FILE, "w") as f:
+            json.dump([], f)
+
+# -----------------------------
+# Load Users
+# -----------------------------
+def load_users():
+    with open(USERS_FILE, "r") as f:
+        return json.load(f)
+
+# -----------------------------
+# Save Users
+# -----------------------------
+def save_users(users):
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=4)
+
+# -----------------------------
+# Load Tickets
+# -----------------------------
+def load_tickets():
+    with open(TICKETS_FILE, "r") as f:
+        return json.load(f)
+
+# -----------------------------
+# Save Tickets
+# -----------------------------
+def save_tickets(tickets):
+    with open(TICKETS_FILE, "w") as f:
+        json.dump(tickets, f, indent=4)
+
+# -----------------------------
+# Register User
+# -----------------------------
+def register():
+    users = load_users()
+
+    print("\n===== REGISTER =====")
+
+    username = input("Username: ")
+
+    if username in users:
+        print("Username already exists.")
+        return
+
+    password = input("Password: ")
+
+    users[username] = {
+        "password": password,
+        "role": "user"
+    }
+
+    save_users(users)
+
+    print("Registration Successful!")
+
+# -----------------------------
+# Login
+# -----------------------------
+def login():
+
+    users = load_users()
+
+    print("\n===== LOGIN =====")
+
+    username = input("Username: ")
+    password = input("Password: ")
+
+    if username in users:
+
+        if users[username]["password"] == password:
+
+            print("Login Successful")
+
+            return username, users[username]["role"]
+
+    print("Invalid Login")
+
+    return None, None
+
+# -----------------------------
+# Generate Ticket ID
+# -----------------------------
+def generate_ticket_id():
+    return "T" + str(random.randint(10000,99999))
+
+# -----------------------------
+# User Menu Placeholder
+# -----------------------------
+def user_menu(username):
+
+    while True:
+
+        print("\n===== USER MENU =====")
+        print("1. Book Ticket")
+        print("2. View My Tickets")
+        print("3. Search Ticket")
+        print("4. Cancel Ticket")
+        print("5. Logout")
+
+        choice = input("Enter Choice : ")
+
+        if choice == "1":
+            print("Booking Module Coming in Part 2")
+
+        elif choice == "2":
+            print("View Module Coming in Part 2")
+
+        elif choice == "3":
+            print("Search Module Coming in Part 3")
+
+        elif choice == "4":
+            print("Cancel Module Coming in Part 3")
+
+        elif choice == "5":
+            break
+
+        else:
+            print("Invalid Choice")
+
+# -----------------------------
+# Admin Menu Placeholder
+# -----------------------------
+def admin_menu():
+
+    while True:
+
+        print("\n===== ADMIN MENU =====")
+        print("1. View All Tickets")
+        print("2. Reports")
+        print("3. Logout")
+
+        choice = input("Choice : ")
+
+        if choice == "1":
+            print("Admin Ticket View Coming in Part 5")
+
+        elif choice == "2":
+            print("Reports Coming in Part 5")
+
+        elif choice == "3":
+            break
+
+        else:
+            print("Invalid Choice")
+
+# -----------------------------
+# Main Menu
+# -----------------------------
+def main():
+
+    initialize_files()
+
+    while True:
+
+        print("\n==============================")
+        print("   E - TICKETING SYSTEM")
+        print("==============================")
+        print("1. Register")
+        print("2. Login")
+        print("3. Exit")
+
+        choice = input("Enter Choice : ")
+
+        if choice == "1":
+            register()
+
+        elif choice == "2":
+
+            username, role = login()
+
+            if username:
+
+                if role == "admin":
+                    admin_menu()
+
+                else:
+                    user_menu(username)
+
+        elif choice == "3":
+
+            print("Thank You")
+            break
+
+        else:
+
+            print("Invalid Choice")
+
+# -----------------------------
+# Start Program
+# -----------------------------
+if __name__ == "__main__":
+    main()
+
 def main(NewtonIter, Gamma, ResultName): 
     #dataname = 'logis_U8'
     dataname = 'covtype'
